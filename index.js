@@ -70,7 +70,10 @@ function preload ()
     this.load.spritesheet('skeleton', 'assets/skeleton8.png', { frameWidth: 128, frameHeight: 128 });
     // this.load.image('house', 'assets/rem_0002.png');
     this.load.image('house', 'assets/ncku.png');
+    this.load.image('ncku-short', 'assets/ncku-short.png');
+    this.load.image('ncku-tall', 'assets/nkcu-tall.png');
 }
+
 
 function create ()
 {
@@ -161,7 +164,8 @@ function create ()
                 if (this.direction.y !== 0)
                 {
                     this.y += this.direction.y * this.speed;
-                    this.depth = this.y + 96;
+                    this.depth = this.y + 192;
+                    // console.log(this.depth);
                 }
 
                 //  Walked far enough?
@@ -181,7 +185,8 @@ function create ()
     buildMap();
     placeHouses();
 
-    skeletons.push(this.add.existing(new Skeleton(this, 250, 270, 'walk', 'southEast', 100)));
+    skeletons.push(this.add.existing(new Skeleton(this, 250, 270, 'walk', 'southEast', 180)));
+    skeletons.push(this.add.existing(new Skeleton(this, 320, 220, 'walk', 'southEast', 180)));
     // skeletons.push(this.add.existing(new Skeleton(this, 100, 380, 'walk', 'southEast', 230)));
     // skeletons.push(this.add.existing(new Skeleton(this, 620, 140, 'walk', 'south', 380)));
     // skeletons.push(this.add.existing(new Skeleton(this, 460, 180, 'idle', 'south', 0)));
@@ -231,7 +236,7 @@ function buildMap ()
     // var centerY = 16;
 
     var centerX = canvasWidth/2;
-    var centerY = canvasHeight/2 - 24*mapwidth;
+    var centerY = canvasHeight/2 + 24*mapwidth;
 
 
     var i = 0;
@@ -245,7 +250,7 @@ function buildMap ()
             var tx = (x - y) * tileWidthHalf;
             var ty = (x + y) * tileHeightHalf;
 
-            var tile = scene.add.image(centerX + tx, centerY + ty, 'tiles', id);
+            var tile = scene.add.image(centerX + tx, centerY + ty, 'tiles', id).setOrigin(0.5,1);
             tile.depth = centerY + ty;
 
             i++;
@@ -255,17 +260,27 @@ function buildMap ()
 
 function placeHouses ()
 {
+    var data = scene.cache.json.get('map');
     var canvasWidth = config.width;
     var canvasHeight = config.height;
+    var mapScaleOffset = 24 * data.layers[0].height;
+    var gridWidth = 192/2;
+    var gridHeight = 192/2;
     // var house = scene.add.image(290, 370, 'house');
     // var house = scene.add.image(96, 418, 'house');
-    var house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
+    // var house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
+    // house.depth = house.y + 86;
+    var nckuShort = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset , 'ncku-short').setOrigin(0.5, 1);
+    nckuShort.depth = nckuShort.y + 43;
+    var nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+gridHeight, 'ncku-tall').setOrigin(0.5, 1);
+    nckuTall.depth = nckuTall.y + 43;
+    nckuShort = scene.add.image(canvasWidth/2-gridWidth, canvasHeight/2+mapScaleOffset+gridHeight/2 , 'ncku-short').setOrigin(0.5, 1);
+    nckuShort.depth = nckuShort.y + 43;
+    // house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
 
-    house.depth = house.y + 86;
+    // house = scene.add.image(1300, 290, 'house');
 
-    house = scene.add.image(1300, 290, 'house');
-
-    house.depth = house.y + 86;
+    // house.depth = house.y + 86;
 }
 
 function update ()
