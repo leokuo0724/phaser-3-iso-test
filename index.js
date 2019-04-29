@@ -1,7 +1,10 @@
+var w = window.innerWidth;
+var h = window.innerHeight;
+
 var config = {
     type: Phaser.WEBGL,
-    width: 800,
-    height: 600,
+    width: w,
+    height: h,
     backgroundColor: '#ababab',
     parent: 'phaser-example',
     scene: {
@@ -80,7 +83,6 @@ function create ()
     scene = this;
 
     //  Our Skeleton class
-
     var Skeleton = new Phaser.Class({
 
         Extends: Phaser.GameObjects.Image,
@@ -165,6 +167,7 @@ function create ()
                 {
                     this.y += this.direction.y * this.speed;
                     this.depth = this.y + 192;
+                    // console.log(this.depth)
                     // console.log(this.depth);
                 }
 
@@ -185,8 +188,8 @@ function create ()
     buildMap();
     placeHouses();
 
-    skeletons.push(this.add.existing(new Skeleton(this, 250, 270, 'walk', 'southEast', 180)));
-    skeletons.push(this.add.existing(new Skeleton(this, 320, 220, 'walk', 'southEast', 180)));
+    skeletons.push(this.add.existing(new Skeleton(this, w/2-96, h/2-96/1.718-20, 'walk', 'southEast', 150).setOrigin(0.5,1)));
+    skeletons.push(this.add.existing(new Skeleton(this, w/2-96*2, h/2-20, 'walk', 'southEast', 200).setOrigin(0.5,1)));
     // skeletons.push(this.add.existing(new Skeleton(this, 100, 380, 'walk', 'southEast', 230)));
     // skeletons.push(this.add.existing(new Skeleton(this, 620, 140, 'walk', 'south', 380)));
     // skeletons.push(this.add.existing(new Skeleton(this, 460, 180, 'idle', 'south', 0)));
@@ -206,7 +209,17 @@ function create ()
     // skeletons.push(this.add.existing(new Skeleton(this, 1500, 340, 'walk', 'southWest', 340)));
     // skeletons.push(this.add.existing(new Skeleton(this, 1550, 360, 'walk', 'southWest', 330)));
 
-    this.cameras.main.setSize(800, 600);
+    var mapScale = scene.cache.json.get('map').layers[0].height;
+    this.cameras.main.setSize(w, h);
+    // this.cameras.main.centerOn(w/2, h/2+96);
+    this.cameras.main.centerOn(w/2, h/2+(mapScale-3)*48);
+    console.log(this.cameras.main)
+    // setTimeout(()=>{
+    //     this.cameras.main.zoomTo(0.5, 400);
+    // })
+    // this.cameras.main.setViewport(w/2, h/2, w, h);
+    
+
 
     // this.cameras.main.scrollX = 800;
 }
@@ -236,7 +249,8 @@ function buildMap ()
     // var centerY = 16;
 
     var centerX = canvasWidth/2;
-    var centerY = canvasHeight/2 + 24*mapwidth;
+    // var centerY = canvasHeight/2 + 24*mapwidth;
+    var centerY = canvasHeight/2;
 
 
     var i = 0;
@@ -252,6 +266,7 @@ function buildMap ()
 
             var tile = scene.add.image(centerX + tx, centerY + ty, 'tiles', id).setOrigin(0.5,1);
             tile.depth = centerY + ty;
+            // console.log(tile.depth)
 
             i++;
         }
@@ -263,7 +278,8 @@ function placeHouses ()
     var data = scene.cache.json.get('map');
     var canvasWidth = config.width;
     var canvasHeight = config.height;
-    var mapScaleOffset = 24 * data.layers[0].height;
+    // var mapScaleOffset = 24 * data.layers[0].height;
+    var mapScaleOffset = 0;
     var gridWidth = 192/2;
     var gridHeight = 192/2;
     // var house = scene.add.image(290, 370, 'house');
@@ -271,11 +287,15 @@ function placeHouses ()
     // var house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
     // house.depth = house.y + 86;
     var nckuShort = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset , 'ncku-short').setOrigin(0.5, 1);
-    nckuShort.depth = nckuShort.y + 43;
+    nckuShort.depth = nckuShort.y + 108;
+    console.log(nckuShort.depth)
     var nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+gridHeight, 'ncku-tall').setOrigin(0.5, 1);
-    nckuTall.depth = nckuTall.y + 43;
+    nckuTall.depth = nckuTall.y + 108;
     nckuShort = scene.add.image(canvasWidth/2-gridWidth, canvasHeight/2+mapScaleOffset+gridHeight/2 , 'ncku-short').setOrigin(0.5, 1);
-    nckuShort.depth = nckuShort.y + 43;
+    nckuShort.depth = nckuShort.y + 108;
+    nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+2*gridHeight, 'ncku-tall').setOrigin(0.5, 1);
+    nckuTall.depth = nckuTall.y + 108;
+    console.log(nckuShort.depth)
     // house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
 
     // house = scene.add.image(1300, 290, 'house');
@@ -289,6 +309,25 @@ function update ()
     skeletons.forEach(function (skeleton) {
         skeleton.update();
     });
+
+    var pointer = scene.input.activePointer;
+    // console.log(pointer.x)
+    // console.log(pointer.prevPosition.x)
+    
+    var touchdown = false;
+    scene.input.on('pointerdown', function(){
+        touchdown = true;
+    })
+    scene.input.on('pointerup', function(){
+        touchdown = false;
+    })
+
+    if(pointer.justMoved){
+        let x = this.cameras.main.midPoint.x - pointer.x + pointer.prevPosition.x
+        let y = this.cameras.main.midPoint.y - pointer.y + pointer.prevPosition.y
+        this.cameras.main.centerOn(x, y);
+    }
+    // console.log(pointer.x)
 
     return;
 
