@@ -75,6 +75,7 @@ function preload ()
     this.load.image('house', 'assets/ncku.png');
     this.load.image('ncku-short', 'assets/ncku-short.png');
     this.load.image('ncku-tall', 'assets/nkcu-tall.png');
+    this.load.image('bs', 'assets/bs.png');
 }
 
 
@@ -190,6 +191,7 @@ function create ()
 
     skeletons.push(this.add.existing(new Skeleton(this, w/2-96, h/2-96/1.718-20, 'walk', 'southEast', 150).setOrigin(0.5,1)));
     skeletons.push(this.add.existing(new Skeleton(this, w/2-96*2, h/2-20, 'walk', 'southEast', 200).setOrigin(0.5,1)));
+    skeletons.push(this.add.existing(new Skeleton(this, w/2+96*2, h/2-20, 'walk', 'southWest', 300).setOrigin(0.5,1)));
     // skeletons.push(this.add.existing(new Skeleton(this, 100, 380, 'walk', 'southEast', 230)));
     // skeletons.push(this.add.existing(new Skeleton(this, 620, 140, 'walk', 'south', 380)));
     // skeletons.push(this.add.existing(new Skeleton(this, 460, 180, 'idle', 'south', 0)));
@@ -296,6 +298,10 @@ function placeHouses ()
     nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+2*gridHeight, 'ncku-tall').setOrigin(0.5, 1);
     nckuTall.depth = nckuTall.y + 108;
     console.log(nckuShort.depth)
+    var bs = scene.add.image(canvasWidth/2-2*gridWidth, canvasHeight/2+mapScaleOffset+2.5*gridHeight, 'bs').setOrigin(0.5,1);
+    bs.depth = bs.y + 36;
+    nckuShort = scene.add.image(canvasWidth/2-gridWidth, canvasHeight/2+mapScaleOffset+2.5*gridHeight , 'ncku-short').setOrigin(0.5, 1);
+    nckuShort.depth = nckuShort.y + 108;
     // house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
 
     // house = scene.add.image(1300, 290, 'house');
