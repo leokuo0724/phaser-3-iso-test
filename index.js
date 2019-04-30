@@ -14,6 +14,31 @@ var config = {
     }
 };
 
+var buildingArr = [
+    [1,0,0,0],
+    [0,0,0,0],
+    [0,0,0,0],
+    [0,0,0,0],
+]
+
+var buildingData = [
+    {
+        name: null
+    },
+    {
+        name: 'ncku-short'
+    },
+    {
+        name: 'ncku-tall'
+    },
+    {
+        name: 'bs'
+    },
+    {
+        name: 'church'
+    }
+]
+
 var game = new Phaser.Game(config);
 
 var directions = {
@@ -63,6 +88,9 @@ var tileHeightHalf;
 var d = 0;
 
 var scene;
+var buildingGroup;
+var text;
+var lastTile;
 
 function preload ()
 {
@@ -76,20 +104,34 @@ function preload ()
     this.load.image('ncku-short', 'assets/ncku-short.png');
     this.load.image('ncku-tall', 'assets/nkcu-tall.png');
     this.load.image('bs', 'assets/bs.png');
+    this.load.image('church', 'assets/church.png');
 }
 
 
 function create ()
 {
     scene = this;
+    scene.input.on('pointerdown', function(){
+        text.setText('Nothing');
+        if(lastTile){
+            scene.tweens.add({
+                targets: lastTile,
+                duration: 130,
+                y: '+=20',
+                ease: 'Quad.easeOut',
+            })
+            lastTile.isJump = false;
+            lastTile = null;
+        }
+    })
+
+    // test text
+    text = this.add.text(0,50, 'Click either of the sprites', { font: '16px Courier', fill: '#000000' }).setOrigin(0);
 
     //  Our Skeleton class
     var Skeleton = new Phaser.Class({
-
         Extends: Phaser.GameObjects.Image,
-
         initialize:
-
         function Skeleton (scene, x, y, motion, direction, distance)
         {
             this.startX = x;
@@ -108,7 +150,6 @@ function create ()
 
             scene.time.delayedCall(this.anim.speed * 1000, this.changeFrame, [], this);
         },
-
         changeFrame: function ()
         {
             this.f++;
@@ -187,6 +228,7 @@ function create ()
     });
 
     buildMap();
+    buildingGroup = this.add.group();
     placeHouses();
 
     skeletons.push(this.add.existing(new Skeleton(this, w/2-96, h/2-96/1.718-20, 'walk', 'southEast', 150).setOrigin(0.5,1)));
@@ -215,13 +257,11 @@ function create ()
     this.cameras.main.setSize(w, h);
     // this.cameras.main.centerOn(w/2, h/2+96);
     this.cameras.main.centerOn(w/2, h/2+(mapScale-3)*48);
-    console.log(this.cameras.main)
+    
     // setTimeout(()=>{
     //     this.cameras.main.zoomTo(0.5, 400);
     // })
     // this.cameras.main.setViewport(w/2, h/2, w, h);
-    
-
 
     // this.cameras.main.scrollX = 800;
 }
@@ -268,45 +308,117 @@ function buildMap ()
 
             var tile = scene.add.image(centerX + tx, centerY + ty, 'tiles', id).setOrigin(0.5,1);
             tile.depth = centerY + ty;
-            // console.log(tile.depth)
+            console.log(tile)
 
             i++;
         }
     }
 }
 
-function placeHouses ()
+
+// function placeHouses ()
+// {
+//     var canvasWidth = config.width;
+//     var canvasHeight = config.height;
+//     var mapScaleOffset = 0;
+//     var gridWidth = 192/2;
+//     var gridHeight = 192/2;
+//     var nckuShort = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset , 'ncku-short').setOrigin(0.5, 1);
+//     nckuShort.depth = nckuShort.y + 108;
+//     var nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+gridHeight, 'ncku-tall').setOrigin(0.5, 1);
+//     nckuTall.depth = nckuTall.y + 108;
+//     nckuShort = scene.add.image(canvasWidth/2-gridWidth, canvasHeight/2+mapScaleOffset+gridHeight/2 , 'ncku-short').setOrigin(0.5, 1);
+//     nckuShort.depth = nckuShort.y + 108;
+//     nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+2*gridHeight, 'ncku-tall').setOrigin(0.5, 1);
+//     nckuTall.depth = nckuTall.y + 108;
+//     var bs = scene.add.image(canvasWidth/2-2*gridWidth, canvasHeight/2+mapScaleOffset+2.5*gridHeight, 'bs').setOrigin(0.5,1);
+//     bs.depth = bs.y + 36;
+//     nckuShort = scene.add.image(canvasWidth/2-gridWidth, canvasHeight/2+mapScaleOffset+2.5*gridHeight , 'ncku-short').setOrigin(0.5, 1);
+//     nckuShort.depth = nckuShort.y + 108;
+// }
+
+function placeHouses()
 {
-    var data = scene.cache.json.get('map');
-    var canvasWidth = config.width;
-    var canvasHeight = config.height;
-    // var mapScaleOffset = 24 * data.layers[0].height;
-    var mapScaleOffset = 0;
-    var gridWidth = 192/2;
-    var gridHeight = 192/2;
-    // var house = scene.add.image(290, 370, 'house');
-    // var house = scene.add.image(96, 418, 'house');
-    // var house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
-    // house.depth = house.y + 86;
-    var nckuShort = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset , 'ncku-short').setOrigin(0.5, 1);
-    nckuShort.depth = nckuShort.y + 108;
-    console.log(nckuShort.depth)
-    var nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+gridHeight, 'ncku-tall').setOrigin(0.5, 1);
-    nckuTall.depth = nckuTall.y + 108;
-    nckuShort = scene.add.image(canvasWidth/2-gridWidth, canvasHeight/2+mapScaleOffset+gridHeight/2 , 'ncku-short').setOrigin(0.5, 1);
-    nckuShort.depth = nckuShort.y + 108;
-    nckuTall = scene.add.image(canvasWidth/2, canvasHeight/2+mapScaleOffset+2*gridHeight, 'ncku-tall').setOrigin(0.5, 1);
-    nckuTall.depth = nckuTall.y + 108;
-    console.log(nckuShort.depth)
-    var bs = scene.add.image(canvasWidth/2-2*gridWidth, canvasHeight/2+mapScaleOffset+2.5*gridHeight, 'bs').setOrigin(0.5,1);
-    bs.depth = bs.y + 36;
-    nckuShort = scene.add.image(canvasWidth/2-gridWidth, canvasHeight/2+mapScaleOffset+2.5*gridHeight , 'ncku-short').setOrigin(0.5, 1);
-    nckuShort.depth = nckuShort.y + 108;
-    // house = scene.add.image(canvasWidth/2, canvasHeight/2, 'house')
+    var halfW = config.width/2;
+    var halfH = config.height/2;
+    var offsetWidth = 192/2;
+    var offsetHeight = 192/4;
 
-    // house = scene.add.image(1300, 290, 'house');
+    // var nckuTall = scene.add.image(halfW-offsetWidth, halfH+offsetHeight, 'ncku-tall').setOrigin(0.5, 1);
+    // nckuTall.depth = nckuTall.y + 108;
+    // var church = scene.add.image(halfW-1*offsetWidth, halfH+3*offsetHeight, 'church').setOrigin(0.5, 1);
+    // church.depth = church.y + 108;
+    for(var i=0; i<buildingArr.length; i++){
+        for(var j=0; j<buildingArr[i].length; j++){
+            if(buildingArr[i][j] !== 0){
+                positionX = halfW - i*offsetWidth;
+                positionY = halfH + i*offsetHeight;
+                buildingGroup.create(positionX, positionY, buildingData[buildingArr[i][j]].name).setOrigin(0.5, 1);
+                // console.log(buildingGroup.getChildren())
+                buildingGroup.getChildren()[i+j].setInteractive(scene.input.makePixelPerfect());
+                buildingGroup.getChildren()[i+j].depth = buildingGroup.getChildren()[i+j].y + 108;
+                buildingGroup.getChildren()[i+j].name = buildingData[buildingArr[i][j]].name;
+                buildingGroup.getChildren()[i+j].on('pointerdown', function (pointer, x, y, event) {
+                    text.setText(this.name);
+                    if(this.isJump){
+                        return false
+                    }
+                    this.isJump = true;
+                    if(lastTile){
+                        scene.tweens.add({
+                            targets: lastTile,
+                            duration: 130,
+                            y: '+=20',
+                            ease: 'Quad.easeOut',
+                        })
+                        lastTile.isJump = false;
+                        lastTile = null;
+                    }
+                    scene.tweens.add({
+                        targets: this,
+                        duration: 130,
+                        y: '-=20',
+                        ease: 'Quad.easeOut',
+                    })
+                    lastTile = this;
+                    
+                    event.stopPropagation();
+                });
+            }
+        }
+    }
 
-    // house.depth = house.y + 86;
+    // buildingGroup.create(halfW, halfH, 'ncku-short').setOrigin(0.5, 1);
+    // buildingGroup.getChildren()[0].setInteractive(scene.input.makePixelPerfect());
+    // buildingGroup.getChildren()[0].depth = buildingGroup.getChildren()[0].y + 108;
+    // buildingGroup.getChildren()[0].name = 'ncku';
+
+    // buildingGroup.getChildren()[0].on('pointerdown', function (pointer, x, y, event) {
+    //     text.setText(this.name);
+    //     if(this.isJump){
+    //         return false
+    //     }
+    //     this.isJump = true;
+    //     if(lastTile){
+    //         scene.tweens.add({
+    //             targets: lastTile,
+    //             duration: 130,
+    //             y: '+=20',
+    //             ease: 'Quad.easeOut',
+    //         })
+    //         lastTile.isJump = false;
+    //         lastTile = null;
+    //     }
+    //     scene.tweens.add({
+    //         targets: this,
+    //         duration: 130,
+    //         y: '-=20',
+    //         ease: 'Quad.easeOut',
+    //       })
+    //     lastTile = this;
+        
+    //     event.stopPropagation();
+    // });
 }
 
 function update ()
@@ -320,13 +432,13 @@ function update ()
     // console.log(pointer.x)
     // console.log(pointer.prevPosition.x)
     
-    var touchdown = false;
-    scene.input.on('pointerdown', function(){
-        touchdown = true;
-    })
-    scene.input.on('pointerup', function(){
-        touchdown = false;
-    })
+    // var touchdown = false;
+    // scene.input.on('pointerdown', function(){
+    //     touchdown = true;
+    // })
+    // scene.input.on('pointerup', function(){
+    //     touchdown = false;
+    // })
 
     if(pointer.justMoved){
         let x = this.cameras.main.midPoint.x - pointer.x + pointer.prevPosition.x
